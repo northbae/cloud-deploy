@@ -1,0 +1,29 @@
+spring:
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: rabbit
+    password: rabbit
+    virtual-host: vhost
+
+server:
+  port: 8080
+springdoc:
+  api-docs:
+    resolve-schema-properties: true
+    path: /api
+  swagger-ui:
+    path: /api/doc
+    display-request-duration: true
+    show-extensions: true
+    show-common-extensions: true
+feign:
+  okhttp:
+    enabled: true
+  httpclient:
+    enabled: false
+circuit-breaker:
+  default-config:
+    max-failure: 3
+    min-success: 1
+    timeout: 10s

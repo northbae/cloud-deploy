@@ -1,0 +1,26 @@
+nameOverride: "gateway-service"
+
+image:
+  repository: ${{ secrets.DOCKER_USERNAME }}/gateway-service
+  tag: ${{ github.sha }}
+
+service:
+  port: 8080
+
+# Включаем Ingress только для Gateway
+ingress:
+  enabled: true
+  className: "ingress-nginx" # Или то имя, что у вашего Ingress Controller
+  hosts:
+    - host: k8s-cluster.cloud.ru # Замените на реальный домен, направленный на ваш Ingress Controller
+      paths:
+        - path: /
+          pathType: Prefix
+
+config:
+  SPRING_PROFILES_ACTIVE: "prod-k8s"
+  # Убедитесь, что в application-prod-k8s.yml gateway использует DNS-имена сервисов K8s
+  # Например: http://cars-service-svc:8070, http://rental-service-svc:8060
+  SPRING_RABBITMQ_HOST: "rabbitmq.default" # Если RabbitMQ в default namespace
+
+secrets: {} # У Gateway нет прямого доступа к БД, секреты не нужны

@@ -1,0 +1,17 @@
+nameOverride: "payment-service"
+
+image:
+  repository: ${{ secrets.DOCKER_USERNAME }}/payment-service
+  tag: ${{ github.sha }} # В CI подставляется автоматически
+
+service:
+  port: 8070
+
+config:
+  SPRING_PROFILES_ACTIVE: "prod-k8s"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-db-postgresql.database:5432/payments"
+  # Добавьте другие не-секретные конфиги сюда
+
+secrets:
+  SPRING_DATASOURCE_USERNAME: "payment_user"
+  SPRING_DATASOURCE_PASSWORD: "payment_password" # Пароль, который мы задали в postgres-values.yaml

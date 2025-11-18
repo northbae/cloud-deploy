@@ -1,0 +1,4 @@
+token: y0__xDdlbPnAxjB3RMgyNL9jhUkLKvM1pSOoJKBW3m58hwnDT70rg
+cloud-id: b1ghn6fqet2cms6p6v8t
+folder-id: b1g4mog3rtie486vqkdk
+compute-default-zone: ru-central1-a

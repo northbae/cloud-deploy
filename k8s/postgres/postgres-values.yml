@@ -1,0 +1,28 @@
+# Глобальные настройки аутентификации
+auth:
+  # Суперпользователь postgres
+  postgresPassword: "supersecretpostgrespassword"
+
+  # Создаем пользователей для каждого микросервиса
+  usernames:
+    - "cars_user"
+    - "rental_user"
+    - "payment_user"
+
+  # Создаем пароли для этих пользователей
+  passwords:
+    - "cars_password"   # Замените на сгенерированные, надежные пароли
+    - "rental_password" # или используйте --set auth.passwords[0]=... при установке
+    - "payment_password"
+
+  # Создаем базы данных для каждого микросервиса
+  databases:
+    - "cars"
+    - "rentals"
+    - "payments"
+
+# Настройки для сохранения данных
+primary:
+  persistence:
+    enabled: true
+    size: 8Gi # Размер диска для базы

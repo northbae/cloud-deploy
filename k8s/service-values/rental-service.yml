@@ -1,0 +1,16 @@
+nameOverride: "rental-service"
+
+image:
+  repository: ${{ secrets.DOCKER_USERNAME }}/rental-service
+  tag: ${{ github.sha }}
+
+service:
+  port: 8060
+
+config:
+  SPRING_PROFILES_ACTIVE: "prod-k8s"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-db-postgresql.database:5432/rentals"
+
+secrets:
+  SPRING_DATASOURCE_USERNAME: "rental_user"
+  SPRING_DATASOURCE_PASSWORD: "rental_password"

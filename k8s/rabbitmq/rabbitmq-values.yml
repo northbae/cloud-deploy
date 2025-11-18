@@ -1,0 +1,22 @@
+# Настройки аутентификации для RabbitMQ
+auth:
+  username: "rabbit"
+  password: "rabbit"
+  vhost: "vhost"
+
+persistence:
+  enabled: true
+  size: 8Gi # Размер диска для RabbitMQ
+
+# Отключаем TLS для упрощения, так как сервисы общаются внутри кластера
+# В продакшене рекомендуется включать TLS
+tls:
+  enabled: false
+
+# Настройки для веб-интерфейса (Management UI)
+# Мы создадим для него Service типа ClusterIP, чтобы он не был доступен извне напрямую
+# Для доступа к нему можно использовать kubectl port-forward
+manager:
+  enabled: true
+  service:
+    type: ClusterIP

@@ -1,0 +1,65 @@
+replicaCount: 1
+
+image:
+  repository: my-docker-hub-username/my-app # Будет перезаписано для каждого сервиса
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+nameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 8080
+
+# --- Liveness and Readiness Probes ---
+# https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# У Spring Boot Actuator есть эндпоинты /actuator/health/liveness и /actuator/health/readiness
+# Убедитесь, что зависимость spring-boot-starter-actuator есть в pom.xml
+probes:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /actuator/health/liveness
+      port: http
+    initialDelaySeconds: 45
+    periodSeconds: 15
+    timeoutSeconds: 5
+  readinessProbe:
+    httpGet:
+      path: /actuator/health/readiness
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+
+ingress:
+  enabled: false
+  className: "ingress-nginx"
+  hosts:
+    - host: myapp.example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+
+config:
+  SPRING_PROFILES_ACTIVE: "prod"
+  # Пример для сервиса, которому нужна база данных
+  # SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-svc:5432/cars_db"
+  # Пример для сервиса, которому нужен RabbitMQ
+  # SPRING_RABBITMQ_HOST: "rabbitmq-svc"
+
+# --- Секреты ---
+# Эти значения будут созданы как K8s Secret и переданы как переменные окружения
+secrets: {}
+  # Пример:
+  # SPRING_DATASOURCE_USERNAME: "cars_user"
+# SPRING_DATASOURCE_PASSWORD: "verysecretpassword"
+
+# --- Ресурсы ---
+resources: {}
+  # limits:
+  #   cpu: 500m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 250m
+#   memory: 256Mi

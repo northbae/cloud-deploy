@@ -1,0 +1,144 @@
+name: GitHub Classroom Workflow
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+jobs:
+  build:
+    name: Autograding
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: docker/setup-buildx-action@v2
+
+      - name: Set up JDK 17 (Corretto)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      # ============================================
+      # unit tests
+      # ============================================
+      - name: Run unit tests - cars
+        run: |
+          cd cars-service
+          mvn clean install
+          cd cars-service-impl
+          mvn clean test -Dtest="kz.bmstu.kritinina.service.CarsServiceImplTest"
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Run unit tests - payment
+        run: |
+          cd payment-service
+          mvn clean install
+          cd payment-service-impl
+          mvn clean test -Dtest="kz.bmstu.kritinina.service.PaymentServiceImplTest"
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Run unit tests - rental
+        run: |
+          cd rental-service
+          mvn clean install
+          cd rental-service-impl
+          mvn clean test -Dtest="kz.bmstu.kritinina.service.RentalServiceImplTest"
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      # ============================================
+      # build
+      # ============================================
+      - name: Build with Maven
+        run: |
+          cd cars-service
+          mvn clean package -DskipTests
+          cd ../payment-service
+          mvn clean package -DskipTests
+          cd ../rental-service
+          mvn clean package -DskipTests
+          cd ../gateway-service
+          mvn clean package -DskipTests
+
+      # ============================================
+      # login to docker hub
+      # ============================================
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }
+
+      # ============================================
+      # build and push
+      # ============================================
+      - name: Build and Push Docker images
+        timeout-minutes: 10
+        run: |
+          export IMAGE_TAG=${{ github.sha }}
+          docker compose build
+          docker compose push
+
+      - name: Show pushed images
+        run: |
+          echo "Images pushed to Docker Hub:"
+          echo "- ${{ secrets.DOCKER_USERNAME }}/cars-service:${{ github.sha }}"
+          echo "- ${{ secrets.DOCKER_USERNAME }}/rental-service:${{ github.sha }}"
+          echo "- ${{ secrets.DOCKER_USERNAME }}/payment-service:${{ github.sha }}"
+          echo "- ${{ secrets.DOCKER_USERNAME }}/gateway-service:${{ github.sha }}"
+
+      # ===========================================
+      # deploy
+      # ===========================================
+      - name: Create namespace
+        run: kubectl create namespace my-app
+
+      - name: Deploy cars service
+        run: |
+          helm upgrade --install cars-service ./helm-chart \
+          --namespace my-app \
+          -f ./service-values/cars-service.yaml \
+          --set image.tag=$IMAGE_TAG \
+          --set image.repository=$DOCKER_USERNAME/cars-service
+
+      - name: Deploy rental service
+        run: |
+          helm upgrade --install rental-service ./helm-chart \
+          --namespace my-app \
+          -f ./service-values/rental-service.yaml \
+          --set image.tag=$IMAGE_TAG \
+          --set image.repository=$DOCKER_USERNAME/rental-service
+
+      - name: Deploy payment service
+        run: |
+          helm upgrade --install payment-service ./helm-chart \
+          --namespace my-app \
+          -f ./service-values/payment-service.yaml \
+          --set image.tag=$IMAGE_TAG \
+          --set image.repository=$DOCKER_USERNAME/payment-service
+
+      - name: Deploy gateway service
+        run: |
+          helm upgrade --install gateway-service ./helm-chart \
+          --namespace my-app \
+          -f ./service-values/gateway-service.yaml \
+          --set image.tag=$IMAGE_TAG \
+          --set image.repository=$DOCKER_USERNAME/gateway-service
+
+      - name: Wait before services are ready
+        run: kubectl wait -n test -l app.kubernetes.io/name=gateway pod --for=condition=Ready --timeout 3m
+
+      # TODO setup parameters in classroom/autograding.json
+
+      - name: Autograding
+        uses: education/autograding@v1
+        continue-on-error: true
