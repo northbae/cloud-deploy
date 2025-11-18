@@ -107,7 +107,7 @@ jobs:
       - name: Deploy cars service
         run: |
           helm upgrade --install cars-service ./helm-chart \
-          --namespace my-app \
+          --namespace ingress-nginx \
           -f ./service-values/cars-service.yaml \
           --set image.tag=$IMAGE_TAG \
           --set image.repository=$DOCKER_USERNAME/cars-service
@@ -115,7 +115,7 @@ jobs:
       - name: Deploy rental service
         run: |
           helm upgrade --install rental-service ./helm-chart \
-          --namespace my-app \
+          --namespace ingress-nginx \
           -f ./service-values/rental-service.yaml \
           --set image.tag=$IMAGE_TAG \
           --set image.repository=$DOCKER_USERNAME/rental-service
@@ -123,7 +123,7 @@ jobs:
       - name: Deploy payment service
         run: |
           helm upgrade --install payment-service ./helm-chart \
-          --namespace my-app \
+          --namespace ingress-nginx \
           -f ./service-values/payment-service.yaml \
           --set image.tag=$IMAGE_TAG \
           --set image.repository=$DOCKER_USERNAME/payment-service
@@ -131,7 +131,7 @@ jobs:
       - name: Deploy gateway service
         run: |
           helm upgrade --install gateway-service ./helm-chart \
-          --namespace my-app \
+          --namespace ingress-nginx \
           -f ./service-values/gateway-service.yaml \
           --set image.tag=$IMAGE_TAG \
           --set image.repository=$DOCKER_USERNAME/gateway-service
