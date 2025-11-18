@@ -100,7 +100,9 @@ jobs:
       # deploy
       # ===========================================
       - name: Create namespace
-        run: kubectl create namespace my-app
+        run: |
+          export KUBECONFIG=k8s-cluster_kubeconfig.yml
+          kubectl create namespace ingress-nginx
 
       - name: Deploy cars service
         run: |
