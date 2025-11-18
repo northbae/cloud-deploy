@@ -36,7 +36,7 @@ ingress:
   enabled: false
   className: "ingress-nginx"
   hosts:
-    - host: myapp.example.com
+    - host: ""
       paths:
         - path: /
           pathType: ImplementationSpecific
